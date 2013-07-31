@@ -19,6 +19,7 @@ from pyramid_beaker import session_factory_from_settings
 
 from kotti.sqla import Base as KottiBase
 
+from kotti.history_meta import versioned_session
 
 metadata = MetaData()
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))

@@ -61,6 +61,10 @@ from kotti.util import _
 from kotti.util import camel_case_to_name
 from kotti.util import get_paste_items
 
+from kotti.history_meta import Versioned, versioned_session
+
+versioned_session(DBSession)
+
 
 class ContainerMixin(object, DictMixin):
     """Containers form the API of a Node that's used for subitem
@@ -128,9 +132,12 @@ class ContainerMixin(object, DictMixin):
     @hybrid_property
     def children(self):
         """Return *all* child nodes without considering permissions."""
-
-        return self._children
-
+        #import pdb; pdb.set_trace()
+        try:
+            self._children
+            return self._children
+        except:
+            return []
     def children_with_permission(self, request, permission='view'):
         """
         Return only those children for which the user initiating
@@ -176,7 +183,7 @@ class LocalGroup(Base):
         return self.__class__(**kwargs)
 
 
-class Node(Base, ContainerMixin, PersistentACLMixin):
+class Node(Versioned, Base, ContainerMixin, PersistentACLMixin):
     """Basic node in the persistance hierarchy.
     """
 
@@ -280,6 +287,19 @@ class Node(Base, ContainerMixin, PersistentACLMixin):
             copy.children.append(child.copy())
 
         return copy
+
+    def get_history(self, version):
+        NodeHistory = self.__history_mapper__.class_
+
+        return DBSession.query(NodeHistory).filter(
+            NodeHistory.id == self.id, NodeHistory.version == version).first()
+
+    def get_history_all(self):
+
+        NodeHistory = self.__history_mapper__.class_
+
+        return DBSession.query(NodeHistory).filter(
+            NodeHistory.id == self.id, NodeHistory.version < self.version).all()
 
 
 class TypeInfo(object):
@@ -551,7 +571,6 @@ class Document(Content):
     #: MIME type of the Document
     #: (:class:`sqlalchemy.types.String`)
     mime_type = Column(String(30))
-
     #: type_info is a class attribute
     #: (:class:`~kotti.resources.TypeInfo`)
     type_info = Content.type_info.copy(
@@ -561,12 +580,14 @@ class Document(Content):
         addable_to=[u'Document'],
         )
 
-    def __init__(self, body=u"", mime_type='text/html', **kwargs):
+    def __init__(self, body=u"", map1={}, mime_type='text/html', **kwargs):
 
         super(Document, self).__init__(**kwargs)
 
         self.body = body
         self.mime_type = mime_type
+        if "wewe" in map1:
+            self.wewe = map1["wewe"]
 
 
 class File(Content):

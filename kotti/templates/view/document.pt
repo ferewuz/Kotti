@@ -10,6 +10,9 @@
     <div tal:replace="api.render_template('kotti:templates/view/tags.pt')" />
     <div class="body" tal:content="structure context.body | None">
     </div>
+    <tal:block  tal:define="nodes python: context.get_history_all()">
+      <p tal:repeat="node nodes" tal:content="node.title" />
+    </tal:block>
   </article>
 
 </html>
