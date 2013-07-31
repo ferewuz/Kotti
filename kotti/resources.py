@@ -580,15 +580,12 @@ class Document(Content):
         addable_to=[u'Document'],
         )
 
-    def __init__(self, body=u"", map1={}, mime_type='text/html', **kwargs):
+    def __init__(self, body=u"", mime_type='text/html', **kwargs):
 
         super(Document, self).__init__(**kwargs)
 
         self.body = body
         self.mime_type = mime_type
-        if "wewe" in map1:
-            self.wewe = map1["wewe"]
-
 
 class File(Content):
     """File adds some attributes to :class:`~kotti.resources.Content` that are
